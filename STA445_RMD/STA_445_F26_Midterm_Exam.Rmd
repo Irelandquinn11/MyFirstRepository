@@ -1,0 +1,146 @@
+---
+title: 'STA 445 Midterm Exam - Fall 2026'
+author: "Ireland Huffmaster"
+date: "`r format(Sys.time(),  '%B %d, %Y')`"
+output: pdf_document
+---
+
+```{r, include=FALSE, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+### Here are suggested libraries, you may load others if you wish.
+library(readxl)
+library(tidyverse)
+library(lubridate)
+library(stringr)
+```
+
+
+# Assessment Information
+
+Are you a part of the `BS Data Science` program or `BS Actuarial Science` program?  Please retain the proper answer below and delete the other.
+
+No, I am not in one of the programs above.
+
+# Exam Questions
+
+## Question 1 [25 points]
+
+You will be asked to produce a function called `flag_extreme`. The function will label each element of a numeric vector as `HIGH`, `LOW`, or `TYPICAL` depending on how far the element is from the mean of the vector. Please answer each sub question below.
+
+**a.** [6 points] For some data to analyze with your function, load the data set `mtcars` from base R. The `mtcars` set contains $11$ variables on $32$ different cars. Display the first few rows of the data.
+
+```{r}
+data("mtcars")
+head(mtcars)
+```
+
+**b.** [12 points] Produce the function `flag_extreme`. The function should accept as inputs a numeric vector `x` and a number `k` that has a **default value of 2**. The function should return a vector of strings, one for each element of `x`, where
+
+* `HIGH` is returned if the element is **more than** `k` units **above** the mean of `x`,
+* `LOW` is returned if the element is **more than** `k` units **below** the mean of `x`,
+* `TYPICAL` is returned otherwise.
+
+*Hint: "if" statements vectorized to check each elements difference from the mean*
+
+```{r}
+#flag_extreme <- function(n,k) {
+ # k=2
+  #if()
+
+```
+
+**c.** [7 points] Demonstrate that the `flag_extreme` function works properly by analyzing the variable `mpg` within the `mtcars` object. First use the default value of `k`, then use `k = 5`. For each, summarize the number of cars given each label using the `table()` function. *Hints: Your function only accepts a vector, not a data.frame, so you must extract the proper vector. To output the summary table, use `table(flag_extreme(datavector))`*
+
+```{r}
+
+```
+
+## Question 2 [15 points]
+
+In the area marked as `???` write a regular expression that accomplishes the requested task. Use the `strings` object to demonstrate your answer is correct by giving a minimum of two TRUE and two FALSE responses. **Be sure to change the chunk option to eval=TRUE.**
+
+**a.** [7 points] An expression that can determine if a string contains any of the following words: `Alpha`, `Bravo`, `Delta`, `Echo`, `Foxtrot`.
+
+```{r}
+### Change to eval=TRUE or remove eval option
+strings <- c('Alpha', 'Bravo', 'Delta', 'Echo', 'Foxtrot')
+data.frame( string = strings ) %>%
+  mutate( result = str_detect(string, 'a') )
+```
+
+**b.** [8 points] An expression that can determine if a string starts with exactly three letters (any upper or lowercase), followed by a dash, followed by exactly four digits, with nothing after. For example, `ABC-1234` should be TRUE, but `ABC-12345` should be FALSE.
+
+```{r, eval=FALSE}
+### Change to eval=TRUE or remove eval option
+strings <- c('ABC-1234','ABA-1234', 'ABC-12345','Aaa-1')
+data.frame( string = strings ) %>%
+  mutate( result = str_detect(string,'([a-zA-Z]{3})-([0-9]{4})'))
+```
+
+## Question 3 [15 points]
+
+The required timezone information is provided in each question! Answer the following date-time questions.
+
+**a.** [5 points] A video call is scheduled to start at 3:00 PM local time on March 10th, 2026 in `America/New_York`.  Create the object `Call.Start` for this time stamp, be sure to include the timezone. Display the object to screen.
+
+```{r}
+Call.Start<- mdy_hm('March 10, 2026 3:00 PM', tz='America/New_york')
+Call.Start
+```
+
+**b.** [5 points] What time will it be in `US/Arizona` when the call starts?  Return/display the results of an R calculation here.
+
+```{r}
+with_tz(Call.Start, tz='US/Arizona')
+```
+
+**c.** [5 points] The call lasts $90$ minutes. Create the object `Call.End` using an R calculation on `Call.Start`, and then display what the date and time will be in `Asia/Tokyo` when the call ends.
+
+```{r}
+Call.End <- Call.Start- minutes(90)
+with_tz(Call.End, tz= 'Asia/Tokyo')
+```
+
+## Question 4 [35 points]
+
+The `Exam1_Data_F26.xlsx` file contains data developed across two field survey trips (`ID`). Information was collected at four different `Sites` during four different `Periods` of the day. Two counts were taken for each observation and were recorded as `Birds` and `Insects`. There are potentially many observations of the same `Period` and `Site`. The data from the two trips is available on Sheets 2 and 3 of the provided file. Sheet 4 contains information about each of the four sites. 
+
+**a.** [7 points] Read in the two different data sets on Sheets 2 and 3. Row bind the data into a single data frame named `Q4data`. There should be 5 columns: `ID`, `Site`, `Period`, `Birds`, `Insects`, totaling 100 observations. Demonstrate this by returning to screen the structure of the `Q4data` object. This can be done using the `str()` function. Do __not__ display any of the data.frames in your final answer, only the structure of the combined data frame (a tibble is acceptable).
+
+```{r}
+Sheet_2 <- read_excel("../data-raw/Exam1_Data_F26.xlsx", sheet=2)
+Sheet_3 <- read_excel("../data-raw/Exam1_Data_F26.xlsx", sheet=3)
+Q4data <- rbind(Sheet_2,Sheet_3)
+str(Q4data)
+```
+
+**b.** [5 points] Read in the site information on Sheet 4. **Join** this information onto `Q4data` so that every observation also has the `Elevation_m` and `Canopy` of its `Site`. Save the result as `Q4join` and display the `head`.
+
+```{r}
+Sheet_4 <- read_excel("../data-raw/Exam1_Data_F26.xlsx", sheet=4)
+Q4join<- inner_join(Q4data,Sheet_4)
+head(Q4join)
+```
+
+**c.** [6 points] We are interested in counting the number of `Site` and `Period` combinations.  Create a `wide` table that has the `Period` as columns, the `Site` as rows, and the **counts** for each pair within the table. *Hint: count() then pivot!*
+
+```{r}
+#Q4join %>% pivot_wider (names_from=,'Period' values_from= 
+```
+
+**d.** [7 points] Finally, we want to make a visual assessment of the total `Birds` and total `Insects` observed across the two trips. Group the data by `Site` and `Period` and summarize the total `Birds` and total `Insects` found for each combination. Save this as a new data.frame `plotme` and display the `head`. *Hint: dplyr summary pipeline! Finding the total requires we take the sum. You may call the newly created columns totalBirds and totalInsects.*
+
+```{r}
+
+```
+
+**e.** [6 points] Use the data.frame `plotme` to view the total Birds against the total Insects as a scatter graph, and color the points based on the `Site`. Give the graph a title and clear axis labels.
+
+```{r}
+
+```
+
+**f.** [4 points] Within `plotme`, `Period` is stored as text so R orders it alphabetically. Convert `Period` to a factor with the levels in the order of the day: `Dawn`, `Noon`, `Dusk`, `Night`. Display the levels of the new factor using the function `levels()`, then recreate your graph from part (e) introducing facets for each `Period`.
+
+```{r}
+
+```
